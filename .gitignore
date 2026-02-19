@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+
+# Data files (too large for Git)
+data/
+*.csv
+*.parquet
+*.json
+
+# Logs
+logs/
+*.log
+
+# Airflow
+airflow/logs/
+airflow/*.db
+airflow/*.pid
+
+# Spark
+spark-streaming/checkpoints/
+*.crc
+
+# Environment
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
