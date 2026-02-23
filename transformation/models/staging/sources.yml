@@ -1,0 +1,28 @@
+version: 2
+
+sources:
+  - name: raw
+    description: "Raw transaction data from Spark Streaming"
+    database: airflow
+    schema: raw
+    
+    tables:
+      - name: raw_transactions
+        description: "Raw transactions loaded from Parquet via Spark"
+        
+        columns:
+          - name: transaction_id
+            description: "Unique transaction identifier"
+            tests:
+              - not_null
+              - unique
+          
+          - name: customer_id
+            description: "Customer identifier"
+            tests:
+              - not_null
+          
+          - name: amount
+            description: "Transaction amount"
+            tests:
+              - not_null

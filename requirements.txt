@@ -1,0 +1,5 @@
+# Core Analytics Engineering
+dbt-postgres==1.7.9
+
+# Optional but commonly required by dbt
+psycopg2-binary>=2.9
