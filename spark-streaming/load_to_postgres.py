@@ -12,7 +12,7 @@ df = spark.read.parquet("../data/raw_transactions")
 count_parquet = df.count()
 print(f"✅ Loaded {count_parquet} records from Parquet")
 
-jdbc_url = "jdbc:postgresql://localhost:5432/airflow"
+jdbc_url = "jdbc:postgresql://postgres:5432/airflow"
 
 properties = {
     "user": "airflow",
