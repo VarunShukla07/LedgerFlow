@@ -70,14 +70,14 @@ load_data = BashOperator(
 # Task 3: Run dbt models
 dbt_run = BashOperator(
     task_id='dbt_run_all',
-    bash_command='cd /opt/project/transformation && dbt run',
+    bash_command='cd /opt/project/transformation && dbt run --profiles-dir ./profiles',
     dag=dag,
 )
 
 # Task 4: Run dbt tests
 dbt_test = BashOperator(
     task_id='dbt_test_all',
-    bash_command='cd /opt/project/transformation && dbt test',
+    bash_command='cd /opt/project/transformation && dbt test --profiles-dir ./profiles',
     dag=dag,
 )
 
