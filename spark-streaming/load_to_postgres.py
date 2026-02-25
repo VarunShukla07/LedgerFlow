@@ -15,6 +15,8 @@ try:
         .option("basePath", parquet_path) \
         .parquet(f"{parquet_path}/year=*/month=*/day=*")
 
+    # Add Lightweight Dedup Before Write
+    df = df.dropDuplicates(["transaction_id"])
     count = df.count()
     print(f"Loaded {count} records from parquet")
 
@@ -45,7 +47,7 @@ try:
     }
 
     df.write \
-        .mode("overwrite") \
+        .mode("append") \
         .jdbc(
             url=jdbc_url,
             table="raw.raw_transactions",
