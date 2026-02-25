@@ -62,6 +62,17 @@ services:
       timeout: 5s
       retries: 5
 
+  spark-loader:
+    build:
+      context: ./spark-streaming
+    container_name: spark-loader
+    volumes:
+      - ./spark-streaming:/opt/spark-streaming
+      - ./data:/opt/data
+    networks:
+      - fintech-network
+    command: tail -f /dev/null
+
   # Airflow Webserver - UI for monitoring DAGs
   airflow-webserver:
     image: apache/airflow:2.7.0-python3.10
@@ -79,7 +90,7 @@ services:
       _AIRFLOW_WWW_USER_CREATE: true
       _AIRFLOW_WWW_USER_USERNAME: admin
       _AIRFLOW_WWW_USER_PASSWORD: admin
-      _PIP_ADDITIONAL_REQUIREMENTS: dbt-postgres psycopg2-binary pyspark
+      _PIP_ADDITIONAL_REQUIREMENTS: dbt-postgres psycopg2-binary
     ports:
       - "8080:8080"
     volumes:
@@ -87,6 +98,7 @@ services:
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/plugins:/opt/airflow/plugins
       - ./:/opt/project
+      - /var/run/docker.sock:/var/run/docker.sock 
     networks:
       - fintech-network
     command: webserver
@@ -108,12 +120,13 @@ services:
       AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
       AIRFLOW__CORE__LOAD_EXAMPLES: False
-      _PIP_ADDITIONAL_REQUIREMENTS: dbt-postgres psycopg2-binary pyspark
+      _PIP_ADDITIONAL_REQUIREMENTS: dbt-postgres psycopg2-binary
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/plugins:/opt/airflow/plugins
       - ./:/opt/project
+      - /var/run/docker.sock:/var/run/docker.sock 
     networks:
       - fintech-network
     command: scheduler

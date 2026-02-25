@@ -1,41 +1,63 @@
 from pyspark.sql import SparkSession
+import sys
+import psycopg2
 
-print("🚀 Starting Parquet to PostgreSQL loader...")
+print("🚀 Starting load job...")
 
 spark = SparkSession.builder \
     .appName("LoadToPostgres") \
-    .config("spark.jars.packages", "org.postgresql:postgresql:42.6.0") \
     .getOrCreate()
 
-df = spark.read.parquet("../data/raw_transactions")
+try:
+    parquet_path = "/opt/data/raw_transactions"
 
-count_parquet = df.count()
-print(f"✅ Loaded {count_parquet} records from Parquet")
+    df = spark.read \
+        .option("basePath", parquet_path) \
+        .parquet(f"{parquet_path}/year=*/month=*/day=*")
 
-jdbc_url = "jdbc:postgresql://postgres:5432/airflow"
+    count = df.count()
+    print(f"Loaded {count} records from parquet")
 
-properties = {
-    "user": "airflow",
-    "password": "airflow",
-    "driver": "org.postgresql.Driver"
-}
+    if count == 0:
+        print("No data found. Exiting.")
+        spark.stop()
+        sys.exit(0)
 
-df.write \
-    .mode("overwrite") \
-    .jdbc(
-        url=jdbc_url,
-        table="raw.raw_transactions",
-        properties=properties
+    # --- Ensure schema exists ---
+    conn = psycopg2.connect(
+        host="postgres",
+        port=5432,
+        database="airflow",
+        user="airflow",
+        password="airflow"
     )
+    conn.autocommit = True
+    cur = conn.cursor()
+    cur.execute("CREATE SCHEMA IF NOT EXISTS raw;")
+    cur.close()
+    conn.close()
 
-print("✅ Data written to raw.raw_transactions")
+    jdbc_url = "jdbc:postgresql://postgres:5432/airflow"
+    properties = {
+        "user": "airflow",
+        "password": "airflow",
+        "driver": "org.postgresql.Driver"
+    }
 
-df_verify = spark.read.jdbc(
-    url=jdbc_url,
-    table="raw.raw_transactions",
-    properties=properties
-)
+    df.write \
+        .mode("overwrite") \
+        .jdbc(
+            url=jdbc_url,
+            table="raw.raw_transactions",
+            properties=properties
+        )
 
-print(f"✅ Verified {df_verify.count()} records")
+    print("Data written to PostgreSQL successfully")
 
-spark.stop()
+    spark.stop()
+    sys.exit(0)
+
+except Exception as e:
+    print(f"Error: {e}")
+    spark.stop()
+    sys.exit(1)

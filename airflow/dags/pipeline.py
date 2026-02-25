@@ -63,7 +63,7 @@ check_data = PythonOperator(
 # Task 2: Load Parquet to PostgreSQL (calls existing script)
 load_data = BashOperator(
     task_id='load_parquet_to_postgres',
-    bash_command='cd /opt/project/spark-streaming && python3 load_to_postgres.py',
+    bash_command='docker exec spark-loader python3 /opt/spark-streaming/load_to_postgres.py',
     dag=dag,
 )
 
