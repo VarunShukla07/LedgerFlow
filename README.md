@@ -15,45 +15,8 @@ A Python producer simulates a payment gateway by streaming transactions into Kaf
 > See `docs/architecture.md` for the visual diagram layout.
 > See `docs/component_decision.md` for full component decisions, failure scenarios, and scaling strategy.
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│  DATA SOURCES                                                            │
-│  Kaggle fraudTrain.csv (70%)  +  Faker synthetic Indian payments (30%)   │
-└─────────────────────────────┬────────────────────────────────────────────┘
-                              │ producer.py  (kafka-python)
-                              ▼
-┌──────────────────────────────────────────────────────────────────────────┐
-│  KAFKA  —  topic: transactions                                           │
-│  Single broker · Port 9092 · 7-day retention                             │
-└─────────────────────────────┬────────────────────────────────────────────┘
-                              │ Spark Structured Streaming
-                              ▼
-┌──────────────────────────────────────────────────────────────────────────┐
-│  BRONZE LAYER  (Parquet · partitioned by year/month/day)                 │
-│  data/raw_transactions/year=*/month=*/day=*/                             │
-│  data/dead_letter_queue/  ← malformed records                            │
-└─────────────────────────────┬────────────────────────────────────────────┘
-                              │ load_to_postgres.py  (Airflow task)
-                              ▼
-┌──────────────────────────────────────────────────────────────────────────┐
-│  SILVER LAYER  (PostgreSQL · schema: raw)                                │
-│  raw.transactions  ← ON CONFLICT DO NOTHING (idempotent)                 │
-│  metadata.load_audit          ← every run logged (SUCCESS / FAILED)      │
-│  metadata.data_quality_metrics ← duplicates, nulls, invalids per run     │
-└─────────────────────────────┬────────────────────────────────────────────┘
-                              │ dbt run  (Airflow TaskGroups)
-                              ▼
-┌──────────────────────────────────────────────────────────────────────────┐
-│  GOLD LAYER  (PostgreSQL · schema: marts)                                │
-│  staging/   stg_transactions · stg_merchants                             │
-│  intermediate/  int_transactions_enriched  (time features · city tier)   │
-│  marts/     fact_transactions  ← incremental · 3-day lookback            │
-│             dim_customers · dim_merchants · daily_revenue_summary        │
-└──────────────────────────────────────────────────────────────────────────┘
-                              ▲
-                    Airflow orchestrates everything
-                    right of the Bronze write
-```
+<img width="3031" height="949" alt="diagram-export-27-02-2026-02_42_23" src="https://github.com/user-attachments/assets/c4023570-6ad7-4978-8a42-5ffaa5fdda05" />
+
 
 ---
 
@@ -228,3 +191,4 @@ Each layer protects against different failure scenarios.
 
 - [`docs/architecture.md`](docs/architecture.md) — Visual Diagram Layout
 - [`docs/component_decision.md`](docs/component_decision.md) — Component decisions, failure scenarios, scaling strategy
+
