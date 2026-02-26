@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: fact_transactions
+    description: "Gold layer fact table with one row per transaction"
+    columns:
+      - name: transaction_id
+        description: "Unique transaction identifier"
+        tests:
+          - not_null
+          - unique
+
+      - name: amount
+        description: "Transaction amount"
+        tests:
+          - not_null
+
+      - name: merchant_id
+        description: "Foreign key to merchant dimension"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_merchants')
+              field: merchant_id

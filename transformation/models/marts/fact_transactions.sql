@@ -1,9 +1,12 @@
 -- Mart: Transaction fact table
 
-{{ config(
-    materialized='table',
-    schema='marts'
-) }}
+{{ 
+    config(
+        materialized='incremental',
+        unique_key='transaction_id',
+        incremental_strategy='merge'
+    ) 
+}}
 
 SELECT
     transaction_id,
@@ -33,3 +36,7 @@ SELECT
     ingestion_timestamp
 
 FROM {{ ref('int_transactions_enriched') }}
+
+{% if is_incremental() %}
+    WHERE transaction_date >= current_date - interval '3 day'
+{% endif %}
