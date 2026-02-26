@@ -3,7 +3,15 @@ Configuration for Spark Streaming Application
 """
 
 import os
+import logging
 from pathlib import Path
+
+#loggin setup
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 # Base paths
 PROJECT_ROOT = Path(__file__).parent.parent.absolute()
@@ -90,10 +98,10 @@ class Config:
     
     def validate(self):
         """Validate configuration"""
-        print(f"✓ Kafka Servers: {self.kafka_bootstrap_servers}")
-        print(f"✓ Kafka Topic: {self.kafka_topic}")
-        print(f"✓ Output Path: {self.raw_transactions_path}")
-        print(f"✓ Checkpoint Path: {self.checkpoints_path}")
+        logger.info(f"✓ Kafka Servers: {self.kafka_bootstrap_servers}")
+        logger.info(f"✓ Kafka Topic: {self.kafka_topic}")
+        logger.info(f"✓ Output Path: {self.raw_transactions_path}")
+        logger.info(f"✓ Checkpoint Path: {self.checkpoints_path}")
         return True
     
     def ensure_directories(self):
@@ -101,19 +109,19 @@ class Config:
         self.raw_transactions_path.mkdir(parents=True, exist_ok=True)
         self.dead_letter_path.mkdir(parents=True, exist_ok=True)
         self.checkpoints_path.mkdir(parents=True, exist_ok=True)
-        print(f"✓ Created directories")
+        logger.info(f"✓ Created directories")
     
     def print_config(self):
-        """Print configuration summary"""
-        print("\n" + "="*60)
-        print("SPARK STREAMING CONFIGURATION")
-        print("="*60)
-        print(f"App Name: {self.spark_app_name}")
-        print(f"Kafka: {self.kafka_bootstrap_servers}")
-        print(f"Topic: {self.kafka_topic}")
-        print(f"Output: {self.raw_transactions_path}")
-        print(f"Trigger: Every {self.trigger_interval_seconds} seconds")
-        print("="*60 + "\n")
+        """Logging configuration summary"""
+        logger.info("=" * 60)
+        logger.info("SPARK STREAMING CONFIGURATION")
+        logger.info("=" * 60)
+        logger.info(f"App Name: {self.spark_app_name}")
+        logger.info(f"Kafka: {self.kafka_bootstrap_servers}")
+        logger.info(f"Topic: {self.kafka_topic}")
+        logger.info(f"Output: {self.raw_transactions_path}")
+        logger.info(f"Trigger: Every {self.trigger_interval_seconds} seconds")
+        logger.info("=" * 60)
 
 
 # Create global config instance

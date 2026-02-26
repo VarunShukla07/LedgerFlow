@@ -1,8 +1,15 @@
 from pyspark.sql import SparkSession
 import sys
 import psycopg2
+import logging
 
-print("🚀 Starting load job...")
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+logger.info("🚀 Starting load job...")
 
 spark = SparkSession.builder \
     .appName("LoadToPostgres") \
@@ -69,18 +76,18 @@ try:
             ((df.year == last_year) & (df.month > last_month)) |
             ((df.year == last_year) & (df.month == last_month) & (df.day > last_day))
         )
-        print(f"Loading only partitions after {last_year}-{last_month}-{last_day}")
+        logger.info(f"Loading only partitions after {last_year}-{last_month}-{last_day}")
     else:
-        print("No previous load found. Full load.")
+        logger.info("No previous load found. Full load.")
 
     # Dedup
     df = df.dropDuplicates(["transaction_id"])
 
     count = df.count()
-    print(f"Loaded {count} records from parquet")
+    logger.info(f"Loaded {count} records from parquet")
 
     if count == 0:
-        print("No data found. Exiting.")
+        logger.info("No data found. Exiting.")
         spark.stop()
         conn.close()
         sys.exit(0)
@@ -123,7 +130,7 @@ try:
         "SUCCESS"
     ))
 
-    print("Data written to PostgreSQL successfully")
+    logger.info("Data written to PostgreSQL successfully")
 
     cur.close()
     conn.close()
@@ -131,6 +138,6 @@ try:
     sys.exit(0)
 
 except Exception as e:
-    print(f"Error: {e}")
+    logger.error(f"Error: {e}")
     spark.stop()
     sys.exit(1)

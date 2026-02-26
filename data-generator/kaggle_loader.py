@@ -103,17 +103,17 @@ if __name__ == "__main__":
     loader = KaggleDataLoader()
     
     if loader.load_data():
-        # Print first 3 transactions
-        print("\n" + "="*50)
-        print("SAMPLE TRANSACTIONS")
-        print("="*50)
+        # Logging first 3 transactions
+        logger.info("=" * 50)
+        logger.info("SAMPLE TRANSACTIONS")
+        logger.info("=" * 50)
         
         for i in range(3):
             txn = loader.get_next_transaction()
             if txn:
-                print(f"\nTransaction {i+1}:")
-                print(f"  ID: {txn['transaction_id']}")
-                print(f"  Customer: {txn['customer_name']}")
-                print(f"  Merchant: {txn['merchant_name']}")
-                print(f"  Amount: ${txn['amount']:.2f}")
-                print(f"  Fraud: {'YES' if txn['is_fraud'] else 'NO'}")
+                logger.info(f"Transaction {i+1}:")
+                logger.info(f"  ID: {txn['transaction_id']}")
+                logger.info(f"  Customer: {txn['customer_name']}")
+                logger.info(f"  Merchant: {txn['merchant_name']}")
+                logger.info(f"  Amount: ${txn['amount']:.2f}")
+                logger.info(f"  Fraud: {'YES' if txn['is_fraud'] else 'NO'}")
